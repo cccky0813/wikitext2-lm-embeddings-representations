@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+
+# large / regenerable artefacts
+data/raw/*
+data/processed/*
+checkpoints/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!checkpoints/.gitkeep
+
+# keep metrics, figures, samples and logs (small, used in the report)
+
+# course material
+Assignment1_2026.pdf
+archive/
+
+# build artefacts
+report/overleaf.zip
+.claude/
+dsa_assignment1.pdf

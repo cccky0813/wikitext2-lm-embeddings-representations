@@ -1,0 +1,84 @@
+{
+  "name": "part1_rnn",
+  "config": {
+    "seed": 42,
+    "data": {
+      "name": "wikitext-2",
+      "lowercase": true,
+      "min_freq": 1,
+      "processed_dir": "data/processed"
+    },
+    "train": {
+      "seq_len": 64,
+      "batch_size": 32,
+      "epochs": 30,
+      "optimizer": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "grad_clip": 1.0,
+      "early_stopping_patience": 3,
+      "device": "auto"
+    },
+    "model": {
+      "emb_dim": 100,
+      "hidden_dim": 256,
+      "num_layers": 2,
+      "dropout": 0.3,
+      "tie_weights": false,
+      "type": "rnn",
+      "embedding": "random_trainable"
+    },
+    "generate": {
+      "prompts_file": "configs/prompts.txt",
+      "max_new_tokens": 40,
+      "strategy": "top_k",
+      "top_k": 40,
+      "temperature": 0.8,
+      "seed": 123
+    },
+    "benchmark": {
+      "num_batches": 50,
+      "warmup_batches": 5
+    },
+    "name": "part1_rnn"
+  },
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.15",
+    "torch": "2.14.0",
+    "device": "mps"
+  },
+  "params": {
+    "total": 10545173,
+    "trainable": 10545173
+  },
+  "embedding_coverage": null,
+  "train_seconds": 3674.610654255841,
+  "train_seconds_to_best": 3548.398544005584,
+  "best_epoch": 29,
+  "epochs_run": 30,
+  "valid": {
+    "cross_entropy": 5.247274895631593,
+    "perplexity": 190.0476624366893,
+    "num_tokens": 216346
+  },
+  "test": {
+    "cross_entropy": 5.173018769638388,
+    "perplexity": 176.44668621491113,
+    "num_tokens": 244101
+  },
+  "throughput": {
+    "seconds": 1.1446433337405324,
+    "tokens_per_sec": 89460.18115998745,
+    "ms_per_batch": 22.892866674810648,
+    "num_batches": 50,
+    "num_tokens": 102400
+  },
+  "generation": {
+    "distinct_1": 0.6,
+    "distinct_2": 0.8717948717948717,
+    "repeated_trigram_frac": 0.042105263157894736,
+    "unk_frac": 0.06999999999999999
+  }
+}

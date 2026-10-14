@@ -1,0 +1,174 @@
+{
+  "name": "part2_lstm_glove_frozen",
+  "config": {
+    "seed": 42,
+    "data": {
+      "name": "wikitext-2",
+      "lowercase": true,
+      "min_freq": 1,
+      "processed_dir": "data/processed"
+    },
+    "train": {
+      "seq_len": 64,
+      "batch_size": 32,
+      "epochs": 30,
+      "optimizer": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "grad_clip": 1.0,
+      "early_stopping_patience": 3,
+      "device": "auto"
+    },
+    "model": {
+      "emb_dim": 100,
+      "hidden_dim": 256,
+      "num_layers": 2,
+      "dropout": 0.3,
+      "tie_weights": false,
+      "type": "lstm",
+      "embedding": "glove_frozen",
+      "embedding_path": "glove-wiki-gigaword-100",
+      "oov_init": "normal"
+    },
+    "generate": {
+      "prompts_file": "configs/prompts.txt",
+      "max_new_tokens": 40,
+      "strategy": "top_k",
+      "top_k": 40,
+      "temperature": 0.8,
+      "seed": 123
+    },
+    "benchmark": {
+      "num_batches": 50,
+      "warmup_batches": 5
+    },
+    "name": "part2_lstm_glove_frozen"
+  },
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.15",
+    "torch": "2.14.0",
+    "device": "mps"
+  },
+  "params": {
+    "total": 11214869,
+    "trainable": 8323569
+  },
+  "embedding_coverage": {
+    "type_coverage": 0.961849750968456,
+    "token_coverage": 0.9473983668942711,
+    "num_oov_types": 1103,
+    "top_oov": [
+      [
+        "<unk>",
+        54625
+      ],
+      [
+        "<eos>",
+        23767
+      ],
+      [
+        "@-@",
+        16906
+      ],
+      [
+        "@.@",
+        3194
+      ],
+      [
+        "@,@",
+        2699
+      ],
+      [
+        "'t",
+        592
+      ],
+      [
+        "\u00b0",
+        258
+      ],
+      [
+        "\u2212",
+        82
+      ],
+      [
+        "'brien",
+        76
+      ],
+      [
+        "\u00d7",
+        75
+      ],
+      [
+        "'malley",
+        54
+      ],
+      [
+        "magadheera",
+        53
+      ],
+      [
+        "sorraia",
+        48
+      ],
+      [
+        "degrom",
+        47
+      ],
+      [
+        "\u20b9",
+        45
+      ],
+      [
+        "isesi",
+        44
+      ],
+      [
+        "tonin\u00e1",
+        44
+      ],
+      [
+        "coldrum",
+        40
+      ],
+      [
+        "mkhedruli",
+        36
+      ],
+      [
+        "vandernoot",
+        36
+      ]
+    ],
+    "oov_init": "normal",
+    "oov_sigma": 0.40815725922584534
+  },
+  "train_seconds": 2218.1697100815363,
+  "train_seconds_to_best": 1897.3669238723814,
+  "best_epoch": 18,
+  "epochs_run": 21,
+  "valid": {
+    "cross_entropy": 5.090696681509307,
+    "perplexity": 162.50303548602213,
+    "num_tokens": 216346
+  },
+  "test": {
+    "cross_entropy": 5.031344433326907,
+    "perplexity": 153.1387592099117,
+    "num_tokens": 244101
+  },
+  "throughput": {
+    "seconds": 1.2311716666445136,
+    "tokens_per_sec": 83172.8042272815,
+    "ms_per_batch": 24.623433332890272,
+    "num_batches": 50,
+    "num_tokens": 102400
+  },
+  "generation": {
+    "distinct_1": 0.51,
+    "distinct_2": 0.7487179487179487,
+    "repeated_trigram_frac": 0.1368421052631579,
+    "unk_frac": 0.06999999999999999
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "name": "part1_transformer",
+  "config": {
+    "seed": 42,
+    "data": {
+      "name": "wikitext-2",
+      "lowercase": true,
+      "min_freq": 1,
+      "processed_dir": "data/processed"
+    },
+    "train": {
+      "seq_len": 64,
+      "batch_size": 32,
+      "epochs": 30,
+      "optimizer": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "grad_clip": 1.0,
+      "early_stopping_patience": 3,
+      "device": "auto"
+    },
+    "model": {
+      "emb_dim": 100,
+      "hidden_dim": 256,
+      "num_layers": 2,
+      "dropout": 0.2,
+      "tie_weights": false,
+      "type": "transformer",
+      "embedding": "random_trainable",
+      "d_model": 256,
+      "num_heads": 4,
+      "ff_dim": 512,
+      "positional": "learned"
+    },
+    "generate": {
+      "prompts_file": "configs/prompts.txt",
+      "max_new_tokens": 40,
+      "strategy": "top_k",
+      "top_k": 40,
+      "temperature": 0.8,
+      "seed": 123
+    },
+    "benchmark": {
+      "num_batches": 50,
+      "warmup_batches": 5
+    },
+    "name": "part1_transformer"
+  },
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.15",
+    "torch": "2.14.0",
+    "device": "mps"
+  },
+  "params": {
+    "total": 11418901,
+    "trainable": 11418901
+  },
+  "embedding_coverage": null,
+  "train_seconds": 2977.5232803779654,
+  "train_seconds_to_best": 2633.3632956696674,
+  "best_epoch": 23,
+  "epochs_run": 26,
+  "valid": {
+    "cross_entropy": 5.020908885354652,
+    "perplexity": 151.5489818679148,
+    "num_tokens": 216346
+  },
+  "test": {
+    "cross_entropy": 4.962589712160643,
+    "perplexity": 142.96355135771188,
+    "num_tokens": 244101
+  },
+  "throughput": {
+    "seconds": 1.1210540002211928,
+    "tokens_per_sec": 91342.61148864878,
+    "ms_per_batch": 22.421080004423857,
+    "num_batches": 50,
+    "num_tokens": 102400
+  },
+  "generation": {
+    "distinct_1": 0.6599999999999999,
+    "distinct_2": 0.8974358974358975,
+    "repeated_trigram_frac": 0.0368421052631579,
+    "unk_frac": 0.015000000000000003
+  }
+}

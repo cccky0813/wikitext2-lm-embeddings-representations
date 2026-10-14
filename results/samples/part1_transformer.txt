@@ -1,0 +1,12 @@
+# part1_transformer | top_k=40 T=0.8 max_new_tokens=40 seed=123
+
+[the history of the city] of corpus christi and corpus christi . <eos> = = history = = <eos> in addition to a range of a range of approximately 100 mm ( 12 @.@ 5 in ) , the main extensions of the national gulf
+
+[in the early years of the war] . <eos> = = = hurricane kenna = = = <eos> in the atlantic ocean , hurricane christine moved to the central pacific ocean . on january 16 , an eye of convection was detected in the atlantic ocean .
+
+[the album was released] on august 17 , 2006 . " crazy in love " debuted at number 1 on the billboard hot 100 , 2009 . it peaked at number 21 on the billboard hot 100 chart on top five on the chart
+
+[he was born in] a <unk> in the united states . it was a great depression of 983 in 1982 , and the hurricane produced gusty winds of 140 mph ( 140 km / h ) and the north carolina hurricane center ( hpa
+
+[the species is found in] the united states . the formation of species is a member of the migratory species of species that is particularly in the genus stereum , but prefers moderate , moderate <unk> , and <unk> with a smooth surface . the
+

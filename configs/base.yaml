@@ -1,0 +1,39 @@
+# Shared settings for all Part I / Part II language-model runs.
+# Per-experiment configs override keys from this file.
+seed: 42
+
+data:
+  name: wikitext-2            # HuggingFace: Salesforce/wikitext, config wikitext-2-v1
+  lowercase: true             # GloVe-6B is uncased -> lowercase for fair coverage
+  min_freq: 1                 # wikitext-2-v1 already maps rare words to <unk>
+  processed_dir: data/processed
+
+train:
+  seq_len: 64                 # context length (BPTT window / attention window)
+  batch_size: 32
+  epochs: 30
+  optimizer: adam
+  lr: 1.0e-3
+  weight_decay: 0.0
+  grad_clip: 1.0
+  early_stopping_patience: 3  # on validation loss
+  device: auto                # auto -> mps > cuda > cpu
+
+model:
+  emb_dim: 100                # matches GloVe-6B-100d (needed for Part II)
+  hidden_dim: 256
+  num_layers: 2
+  dropout: 0.3
+  tie_weights: false          # keep false: Part II freezes the input embedding table
+
+generate:
+  prompts_file: configs/prompts.txt
+  max_new_tokens: 40
+  strategy: top_k             # matched across all models
+  top_k: 40
+  temperature: 0.8
+  seed: 123
+
+benchmark:
+  num_batches: 50             # common inference workload: 50 x (batch_size, seq_len)
+  warmup_batches: 5

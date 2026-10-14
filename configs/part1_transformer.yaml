@@ -1,0 +1,10 @@
+name: part1_transformer
+model:
+  type: transformer
+  embedding: random_trainable
+  d_model: 256                # emb_dim (100) is linearly projected to d_model
+  num_layers: 2
+  num_heads: 4
+  ff_dim: 512
+  dropout: 0.2
+  positional: learned

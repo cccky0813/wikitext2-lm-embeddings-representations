@@ -1,0 +1,12 @@
+# part1_rnn | top_k=40 T=0.8 max_new_tokens=40 seed=123
+
+[the history of the city] , he had previously been made to the first time of the 20th century . <eos> = = = background = = <eos> the first phase of <unk> , the <unk> in the south , the city was estimated about
+
+[in the early years of the war] . <eos> = = = microscopic life = = = <eos> on the other hand , <unk> can be seen in the top of the 20th century . the song was written by her parents , and was an last
+
+[the album was released] by paul mccartney . she was nominated for the uk of the music and <unk> . <eos> = = = = <unk> <unk> = = = <eos> the film received the best " <unk> of the book " . "
+
+[he was born in] march 2006 . <eos> = = = new york = = = <eos> the australian football league games , federer began the second four @-@ yard @-@ winning @-@ touchdown win streak in the finals . <eos> = = =
+
+[the species is found in] the north wall , which the <unk> has been built for the first commandment , which was originally recorded by a <unk> , with a <unk> by the <unk> <unk> . the <unk> of the magdalen was a <unk> ,
+

@@ -1,0 +1,85 @@
+{
+  "name": "part1_ngram",
+  "config": {
+    "seed": 42,
+    "data": {
+      "name": "wikitext-2",
+      "lowercase": true,
+      "min_freq": 1,
+      "processed_dir": "data/processed"
+    },
+    "train": {
+      "seq_len": 64,
+      "batch_size": 32,
+      "epochs": 30,
+      "optimizer": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "grad_clip": 1.0,
+      "early_stopping_patience": 3,
+      "device": "auto"
+    },
+    "model": {
+      "emb_dim": 100,
+      "hidden_dim": 256,
+      "num_layers": 2,
+      "dropout": 0.3,
+      "tie_weights": false,
+      "type": "ngram",
+      "n": 3,
+      "smoothing": "kneser_ney",
+      "discount": 0.75
+    },
+    "generate": {
+      "prompts_file": "configs/prompts.txt",
+      "max_new_tokens": 40,
+      "strategy": "top_k",
+      "top_k": 40,
+      "temperature": 0.8,
+      "seed": 123
+    },
+    "benchmark": {
+      "num_batches": 50,
+      "warmup_batches": 5
+    },
+    "name": "part1_ngram"
+  },
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.15",
+    "torch": "2.14.0",
+    "device": "mps"
+  },
+  "size": {
+    "order1_raw": 28912,
+    "order2_raw": 586138,
+    "order3_raw": 1377988,
+    "order1_cont": 28912,
+    "order2_cont": 586137,
+    "total_entries": 2608087
+  },
+  "train_seconds": 2.2508438751101494,
+  "valid": {
+    "cross_entropy": 5.492210170894372,
+    "perplexity": 242.79322881737087,
+    "num_tokens": 216346
+  },
+  "test": {
+    "cross_entropy": 5.428462616354921,
+    "perplexity": 227.79876198823516,
+    "num_tokens": 244101
+  },
+  "throughput": {
+    "seconds": 0.11895691696554422,
+    "tokens_per_sec": 860815.8534375944,
+    "num_tokens": 102400,
+    "note": "scalar KN prob per target, CPU"
+  },
+  "generation": {
+    "distinct_1": 0.6699999999999999,
+    "distinct_2": 0.9179487179487179,
+    "repeated_trigram_frac": 0.021052631578947368,
+    "unk_frac": 0.06999999999999999
+  }
+}

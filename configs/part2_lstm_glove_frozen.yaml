@@ -1,0 +1,6 @@
+name: part2_lstm_glove_frozen
+model:
+  type: lstm
+  embedding: glove_frozen
+  embedding_path: glove-wiki-gigaword-100   # gensim downloader name (GloVe 6B, 100d)
+  oov_init: normal            # OOV rows ~ N(0, std of GloVe vectors); <pad> = zeros

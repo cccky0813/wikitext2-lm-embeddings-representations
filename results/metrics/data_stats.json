@@ -1,0 +1,21 @@
+{
+  "vocab_size": 28913,
+  "train_tokens": 2075677,
+  "train_unk_rate": 0.0263,
+  "valid_tokens": 216347,
+  "valid_unk_rate": 0.0542,
+  "test_tokens": 244102,
+  "test_unk_rate": 0.0623,
+  "top10_train": [
+    "the",
+    ",",
+    ".",
+    "of",
+    "<unk>",
+    "and",
+    "in",
+    "to",
+    "a",
+    "="
+  ]
+}

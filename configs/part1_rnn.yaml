@@ -1,0 +1,4 @@
+name: part1_rnn
+model:
+  type: rnn
+  embedding: random_trainable

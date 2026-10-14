@@ -1,0 +1,12 @@
+# part1_ngram | top_k=40 T=0.8 max_new_tokens=40 seed=123
+
+[the history of the city] of sarnia , which was then re @-@ released as an official single " no one wanted to do so , the <unk> and the university of michigan wolverines football team as a result of the film 's " <unk>
+
+[in the early years of the war] . in one season . for the first time . <eos> the family . in the early neolithic builders , he was " . <eos> = = <eos> = = <eos> there were several minor league for the first two
+
+[the album was released] as an " . <eos> = = = <eos> the first round . after the death of five stars . <eos> the most popular <unk> activity after football league championship was not as a result of this , or as
+
+[he was born in] captivity as the film , the first ever " , as the " <unk> in the <unk> @-@ <unk> @-@ <unk> ( or now we can <unk> on a <unk> ( <unk> ) . later that year , and the
+
+[the species is found in] the <unk> of <unk> , and an annual average daily traffic , which has a large amount of information was in the 19th century is described by the end of the year in a <unk> , a <unk> who was
+

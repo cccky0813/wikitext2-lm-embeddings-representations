@@ -1,0 +1,17 @@
+{
+  "method": "skipgram",
+  "seconds": 55.2651586253196,
+  "epochs": 10,
+  "workers": 1,
+  "corpus_tokens": 2075677,
+  "num_sentences": 23767,
+  "vocab_size": 28912,
+  "vector_size": 100,
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.15",
+    "torch": "2.14.0",
+    "device": "mps"
+  }
+}

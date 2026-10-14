@@ -1,0 +1,33 @@
+name: part3_downstream
+seed: 42
+
+task:
+  dataset: ag_news            # HuggingFace: fancyzhx/ag_news, 4 classes (World/Sports/Business/Sci-Tech)
+  train_size: 10000           # stratified subset of the official train split
+  val_size: 2000              # stratified, disjoint from train_size; used to pick C
+  test_size: 2000             # stratified subset of the official test split
+  max_len: 64                 # truncate to the LM context length (seq_len)
+  batch_size: 64
+
+# Each entry: one frozen LM (by its run config) + one pooling method -> fixed-length vector.
+#   last     : top-layer hidden state at the last non-pad position
+#   mean     : mean of top-layer hidden states over non-pad positions
+#   emb_mean : mean of *input* embeddings (context-free reference)
+# The primary comparison is LSTM vs Transformer x last vs mean; the rest connect to Parts I-II.
+representations:
+  - {name: lstm_last,          lm_config: configs/part1_lstm.yaml,               pooling: last}
+  - {name: lstm_mean,          lm_config: configs/part1_lstm.yaml,               pooling: mean}
+  - {name: transformer_last,   lm_config: configs/part1_transformer.yaml,        pooling: last}
+  - {name: transformer_mean,   lm_config: configs/part1_transformer.yaml,        pooling: mean}
+  - {name: rnn_mean,           lm_config: configs/part1_rnn.yaml,                pooling: mean}
+  - {name: lstm_w2v_mean,      lm_config: configs/part2_lstm_w2v_frozen.yaml,    pooling: mean}
+  - {name: lstm_glove_mean,    lm_config: configs/part2_lstm_glove_frozen.yaml,  pooling: mean}
+  - {name: lstm_emb_mean,      lm_config: configs/part1_lstm.yaml,               pooling: emb_mean}
+
+classifier:
+  type: logistic_regression
+  C_grid: [0.01, 0.1, 1.0, 10.0]
+  max_iter: 5000
+  standardize: true
+
+num_error_examples: 12

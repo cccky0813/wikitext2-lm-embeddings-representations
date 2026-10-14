@@ -1,0 +1,204 @@
+vocab_size: 28913
+train_tokens: 2075677
+train_unk_rate: 0.0263
+valid_tokens: 216347
+valid_unk_rate: 0.0542
+test_tokens: 244102
+test_unk_rate: 0.0623
+top10_train: ['the', ',', '.', 'of', '<unk>', 'and', 'in', 'to', 'a', '=']
+fit in 2.3s {'order1_raw': 28912, 'order2_raw': 586138, 'order3_raw': 1377988, 'order1_cont': 28912, 'order2_cont': 586137, 'total_entries': 2608087}
+val ppl 242.79 | test ppl 227.80
+part1_rnn: 10,545,173 params (10,545,173 trainable) on mps
+epoch  1 | train 6.5859 | val 5.8208 (ppl 337.2) | 98s
+epoch  2 | train 5.9873 | val 5.6345 (ppl 279.9) | 96s
+epoch  3 | train 5.7863 | val 5.5218 (ppl 250.1) | 105s
+epoch  4 | train 5.6517 | val 5.4588 (ppl 234.8) | 115s
+epoch  5 | train 5.5542 | val 5.4066 (ppl 222.9) | 116s
+epoch  6 | train 5.4758 | val 5.3892 (ppl 219.0) | 118s
+epoch  7 | train 5.4136 | val 5.3625 (ppl 213.2) | 119s
+epoch  8 | train 5.3622 | val 5.3422 (ppl 209.0) | 116s
+epoch  9 | train 5.3183 | val 5.3203 (ppl 204.4) | 118s
+epoch 10 | train 5.2806 | val 5.3114 (ppl 202.6) | 125s
+epoch 11 | train 5.2478 | val 5.3098 (ppl 202.3) | 130s
+epoch 12 | train 5.2179 | val 5.2944 (ppl 199.2) | 126s
+epoch 13 | train 5.1931 | val 5.2914 (ppl 198.6) | 131s
+epoch 14 | train 5.1687 | val 5.2814 (ppl 196.6) | 129s
+epoch 15 | train 5.1455 | val 5.2724 (ppl 194.9) | 124s
+epoch 16 | train 5.1268 | val 5.2735 (ppl 195.1) | 133s
+epoch 17 | train 5.1071 | val 5.2728 (ppl 195.0) | 126s
+epoch 18 | train 5.0914 | val 5.2634 (ppl 193.1) | 127s
+epoch 19 | train 5.0760 | val 5.2633 (ppl 193.1) | 142s
+epoch 20 | train 5.0603 | val 5.2602 (ppl 192.5) | 129s
+epoch 21 | train 5.0474 | val 5.2582 (ppl 192.1) | 130s
+epoch 22 | train 5.0340 | val 5.2586 (ppl 192.2) | 128s
+epoch 23 | train 5.0219 | val 5.2535 (ppl 191.2) | 124s
+epoch 24 | train 5.0123 | val 5.2545 (ppl 191.4) | 121s
+epoch 25 | train 4.9995 | val 5.2560 (ppl 191.7) | 126s
+epoch 26 | train 4.9921 | val 5.2512 (ppl 190.8) | 122s
+epoch 27 | train 4.9820 | val 5.2532 (ppl 191.2) | 121s
+epoch 28 | train 4.9743 | val 5.2528 (ppl 191.1) | 126s
+epoch 29 | train 4.9661 | val 5.2473 (ppl 190.0) | 128s
+epoch 30 | train 4.9590 | val 5.2577 (ppl 192.0) | 126s
+best val ppl 190.05 | test ppl 176.45
+part1_lstm: 11,214,869 params (11,214,869 trainable) on mps
+epoch  1 | train 6.9504 | val 6.2365 (ppl 511.1) | 128s
+epoch  2 | train 6.3296 | val 5.8737 (ppl 355.6) | 124s
+epoch  3 | train 6.0031 | val 5.6524 (ppl 285.0) | 119s
+epoch  4 | train 5.7977 | val 5.5143 (ppl 248.2) | 116s
+epoch  5 | train 5.6500 | val 5.4301 (ppl 228.2) | 126s
+epoch  6 | train 5.5256 | val 5.3547 (ppl 211.6) | 126s
+epoch  7 | train 5.4136 | val 5.2951 (ppl 199.4) | 125s
+epoch  8 | train 5.3162 | val 5.2491 (ppl 190.4) | 123s
+epoch  9 | train 5.2328 | val 5.2123 (ppl 183.5) | 124s
+epoch 10 | train 5.1613 | val 5.1887 (ppl 179.2) | 125s
+epoch 11 | train 5.0974 | val 5.1731 (ppl 176.5) | 126s
+epoch 12 | train 5.0424 | val 5.1572 (ppl 173.7) | 128s
+epoch 13 | train 4.9926 | val 5.1456 (ppl 171.7) | 121s
+epoch 14 | train 4.9456 | val 5.1379 (ppl 170.4) | 117s
+epoch 15 | train 4.9030 | val 5.1321 (ppl 169.4) | 116s
+epoch 16 | train 4.8647 | val 5.1269 (ppl 168.5) | 117s
+epoch 17 | train 4.8283 | val 5.1258 (ppl 168.3) | 116s
+epoch 18 | train 4.7941 | val 5.1189 (ppl 167.1) | 117s
+epoch 19 | train 4.7642 | val 5.1262 (ppl 168.4) | 113s
+epoch 20 | train 4.7350 | val 5.1227 (ppl 167.8) | 114s
+epoch 21 | train 4.7085 | val 5.1275 (ppl 168.6) | 114s
+early stop at epoch 21 (best 18)
+best val ppl 167.14 | test ppl 156.69
+part1_transformer: 11,418,901 params (11,418,901 trainable) on mps
+epoch  1 | train 6.3942 | val 5.7080 (ppl 301.3) | 115s
+epoch  2 | train 5.7487 | val 5.4563 (ppl 234.2) | 114s
+epoch  3 | train 5.4506 | val 5.3158 (ppl 203.5) | 114s
+epoch  4 | train 5.2469 | val 5.2254 (ppl 185.9) | 114s
+epoch  5 | train 5.0922 | val 5.1779 (ppl 177.3) | 115s
+epoch  6 | train 4.9696 | val 5.1553 (ppl 173.3) | 114s
+epoch  7 | train 4.8693 | val 5.1242 (ppl 168.0) | 114s
+epoch  8 | train 4.7849 | val 5.1064 (ppl 165.1) | 114s
+epoch  9 | train 4.7116 | val 5.0861 (ppl 161.8) | 114s
+epoch 10 | train 4.6499 | val 5.0851 (ppl 161.6) | 115s
+epoch 11 | train 4.5954 | val 5.0718 (ppl 159.5) | 116s
+epoch 12 | train 4.5463 | val 5.0574 (ppl 157.2) | 115s
+epoch 13 | train 4.5033 | val 5.0561 (ppl 157.0) | 114s
+epoch 14 | train 4.4631 | val 5.0529 (ppl 156.5) | 114s
+epoch 15 | train 4.4282 | val 5.0494 (ppl 155.9) | 114s
+epoch 16 | train 4.3950 | val 5.0363 (ppl 153.9) | 115s
+epoch 17 | train 4.3650 | val 5.0342 (ppl 153.6) | 114s
+epoch 18 | train 4.3367 | val 5.0307 (ppl 153.0) | 114s
+epoch 19 | train 4.3105 | val 5.0340 (ppl 153.5) | 114s
+epoch 20 | train 4.2848 | val 5.0239 (ppl 152.0) | 114s
+epoch 21 | train 4.2625 | val 5.0234 (ppl 151.9) | 115s
+epoch 22 | train 4.2405 | val 5.0268 (ppl 152.4) | 114s
+epoch 23 | train 4.2179 | val 5.0209 (ppl 151.5) | 115s
+epoch 24 | train 4.1994 | val 5.0233 (ppl 151.9) | 115s
+epoch 25 | train 4.1818 | val 5.0209 (ppl 151.5) | 114s
+epoch 26 | train 4.1642 | val 5.0220 (ppl 151.7) | 115s
+early stop at epoch 26 (best 23)
+best val ppl 151.55 | test ppl 142.96
+Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
+Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
+Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
+Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
+Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
+Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'
+{'method': 'skipgram', 'seconds': 55.2651586253196, 'epochs': 10, 'workers': 1, 'corpus_tokens': 2075677, 'num_sentences': 23767, 'vocab_size': 28912, 'vector_size': 100, 'hardware': {'platform': 'macOS-26.5.2-arm64-arm-64bit', 'processor': 'arm', 'python': '3.11.15', 'torch': '2.14.0', 'device': 'mps'}}
+king -> ['veera', 'ballala', 'narasimha', 'lordship', 'baal']
+france -> ['russia', 'germany', 'italy', 'hungary', 'sweden']
+album -> ['albums', 'yankovic', 'daydream', 'furtado', 'charmbracelet']
+war -> ['outbreak', 'civil', 'airbase', 'italo', 'wars']
+embedding coverage: types 1.000, tokens 1.000
+part2_lstm_w2v_frozen: 11,214,869 params (8,323,569 trainable) on mps
+epoch  1 | train 7.0028 | val 6.3638 (ppl 580.4) | 100s
+epoch  2 | train 6.3691 | val 5.8415 (ppl 344.3) | 106s
+epoch  3 | train 5.9741 | val 5.5730 (ppl 263.2) | 105s
+epoch  4 | train 5.7212 | val 5.4096 (ppl 223.5) | 105s
+epoch  5 | train 5.5469 | val 5.2999 (ppl 200.3) | 106s
+epoch  6 | train 5.4104 | val 5.2268 (ppl 186.2) | 105s
+epoch  7 | train 5.3014 | val 5.1673 (ppl 175.4) | 105s
+epoch  8 | train 5.2113 | val 5.1251 (ppl 168.2) | 104s
+epoch  9 | train 5.1343 | val 5.0885 (ppl 162.1) | 104s
+epoch 10 | train 5.0685 | val 5.0701 (ppl 159.2) | 105s
+epoch 11 | train 5.0113 | val 5.0496 (ppl 156.0) | 104s
+epoch 12 | train 4.9614 | val 5.0395 (ppl 154.4) | 104s
+epoch 13 | train 4.9175 | val 5.0253 (ppl 152.2) | 104s
+epoch 14 | train 4.8778 | val 5.0250 (ppl 152.2) | 104s
+epoch 15 | train 4.8422 | val 5.0174 (ppl 151.0) | 104s
+epoch 16 | train 4.8103 | val 5.0148 (ppl 150.6) | 105s
+epoch 17 | train 4.7814 | val 5.0131 (ppl 150.4) | 103s
+epoch 18 | train 4.7544 | val 5.0083 (ppl 149.7) | 103s
+epoch 19 | train 4.7303 | val 5.0122 (ppl 150.2) | 103s
+epoch 20 | train 4.7073 | val 5.0102 (ppl 149.9) | 103s
+epoch 21 | train 4.6861 | val 5.0114 (ppl 150.1) | 104s
+early stop at epoch 21 (best 18)
+best val ppl 149.65 | test ppl 141.05
+embedding coverage: types 0.962, tokens 0.947
+part2_lstm_glove_frozen: 11,214,869 params (8,323,569 trainable) on mps
+epoch  1 | train 7.0435 | val 6.4821 (ppl 653.3) | 103s
+epoch  2 | train 6.5193 | val 5.9729 (ppl 392.7) | 104s
+epoch  3 | train 6.1114 | val 5.6857 (ppl 294.6) | 103s
+epoch  4 | train 5.8540 | val 5.5128 (ppl 247.8) | 104s
+epoch  5 | train 5.6843 | val 5.4073 (ppl 223.0) | 104s
+epoch  6 | train 5.5546 | val 5.3340 (ppl 207.3) | 105s
+epoch  7 | train 5.4507 | val 5.2727 (ppl 194.9) | 105s
+epoch  8 | train 5.3640 | val 5.2333 (ppl 187.4) | 105s
+epoch  9 | train 5.2889 | val 5.1900 (ppl 179.5) | 105s
+epoch 10 | train 5.2232 | val 5.1700 (ppl 175.9) | 105s
+epoch 11 | train 5.1662 | val 5.1485 (ppl 172.2) | 107s
+epoch 12 | train 5.1153 | val 5.1307 (ppl 169.1) | 106s
+epoch 13 | train 5.0683 | val 5.1187 (ppl 167.1) | 106s
+epoch 14 | train 5.0275 | val 5.1143 (ppl 166.4) | 107s
+epoch 15 | train 4.9896 | val 5.1097 (ppl 165.6) | 106s
+epoch 16 | train 4.9555 | val 5.0979 (ppl 163.7) | 106s
+epoch 17 | train 4.9220 | val 5.1037 (ppl 164.6) | 107s
+epoch 18 | train 4.8927 | val 5.0907 (ppl 162.5) | 107s
+epoch 19 | train 4.8663 | val 5.0976 (ppl 163.6) | 107s
+epoch 20 | train 4.8395 | val 5.0930 (ppl 162.9) | 107s
+epoch 21 | train 4.8160 | val 5.0914 (ppl 162.6) | 107s
+early stop at epoch 21 (best 18)
+best val ppl 162.50 | test ppl 153.14
+'[Errno 8] nodename nor servname provided, or not known' thrown while requesting HEAD https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/ag_news.py
+Retrying in 1s [Retry 1/5].
+'[Errno 8] nodename nor servname provided, or not known' thrown while requesting HEAD https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/ag_news.py
+Retrying in 2s [Retry 2/5].
+'[Errno 8] nodename nor servname provided, or not known' thrown while requesting HEAD https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/ag_news.py
+Retrying in 4s [Retry 3/5].
+'[Errno 8] nodename nor servname provided, or not known' thrown while requesting HEAD https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/ag_news.py
+Retrying in 8s [Retry 4/5].
+'[Errno 8] nodename nor servname provided, or not known' thrown while requesting HEAD https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/ag_news.py
+Retrying in 8s [Retry 5/5].
+'[Errno 8] nodename nor servname provided, or not known' thrown while requesting HEAD https://huggingface.co/datasets/fancyzhx/ag_news/resolve/eb185aade064a813bc0b7f42de02595523103ca4/ag_news.py
+Using the latest cached version of the dataset since fancyzhx/ag_news couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'default' at /Users/caokaiyue/.cache/huggingface/datasets/fancyzhx___ag_news/default/0.0.0/eb185aade064a813bc0b7f42de02595523103ca4 (last modified on Tue Oct 13 10:47:48 2026).
+tokenization: {'mean_len': 44.556, 'unk_rate': 0.08377098482808151, 'truncated_frac': 0.0615}
+lstm_last          acc 0.6485  macro-F1 0.6441  (C=0.01, LM ppl 156.7)
+lstm_mean          acc 0.7050  macro-F1 0.7033  (C=0.1, LM ppl 156.7)
+transformer_last   acc 0.7200  macro-F1 0.7182  (C=0.01, LM ppl 143.0)
+transformer_mean   acc 0.7735  macro-F1 0.7732  (C=0.1, LM ppl 143.0)
+rnn_mean           acc 0.7300  macro-F1 0.7269  (C=0.01, LM ppl 176.4)
+lstm_w2v_mean      acc 0.7910  macro-F1 0.7899  (C=10.0, LM ppl 141.1)
+lstm_glove_mean    acc 0.8310  macro-F1 0.8302  (C=0.01, LM ppl 153.1)
+lstm_emb_mean      acc 0.6735  macro-F1 0.6722  (C=0.1, LM ppl 156.7)
+
+== part1 ==
+      model  test_CE   test_PPL    val_PPL  params_M  ngram_entries_M     train_s  best_epoch  infer_ktok_s  distinct_2  rep_trigram  unk_frac_gen
+  3-gram KN 5.428463 227.798762 242.793229       NaN         2.608087    2.250844         NaN    860.815853    0.917949     0.021053         0.070
+        RNN 5.173019 176.446686 190.047662 10.545173              NaN 3674.610654        29.0     89.460181    0.871795     0.042105         0.070
+       LSTM 5.054258 156.688265 167.144438 11.214869              NaN 2532.011246        18.0     77.168770    0.861538     0.063158         0.085
+Transformer 4.962590 142.963551 151.548982 11.418901              NaN 2977.523280        23.0     91.342611    0.897436     0.036842         0.015
+
+== part2 ==
+            embedding   test_PPL  best_epoch  final_gap  trainable_M  lm_train_s  emb_train_s  grad_norm_mean  grad_norm_max  type_cov  token_cov  distinct_2
+    random, trainable 156.688265          18  -0.419040    11.214869 2532.011246     0.000000        0.249979       1.262732       NaN        NaN    0.861538
+own Skip-gram, frozen 141.050416          18  -0.325282     8.323569 2186.800193    55.265159        0.254522       1.304839   1.00000   1.000000    0.887179
+        GloVe, frozen 153.138759          18  -0.275314     8.323569 2218.169710          NaN        0.250426       1.621327   0.96185   0.947398    0.748718
+
+== part3 ==
+  representation                            LM  pooling  dim  test_acc  test_macro_F1  best_C  LM_test_PPL
+       lstm_last                          LSTM     last  256    0.6485       0.644083    0.01   156.688265
+       lstm_mean                          LSTM     mean  256    0.7050       0.703265    0.10   156.688265
+transformer_last                   Transformer     last  256    0.7200       0.718194    0.01   142.963551
+transformer_mean                   Transformer     mean  256    0.7735       0.773219    0.10   142.963551
+        rnn_mean                           RNN     mean  256    0.7300       0.726881    0.01   176.446686
+   lstm_w2v_mean LSTM + own Skip-gram (frozen)     mean  256    0.7910       0.789916   10.00   141.050416
+ lstm_glove_mean         LSTM + GloVe (frozen)     mean  256    0.8310       0.830229    0.01   153.138759
+   lstm_emb_mean                          LSTM emb_mean  100    0.6735       0.672154    0.10   156.688265
+
+figures -> /Users/caokaiyue/Documents/NUS-semester1/DSA4213/assignment/results/figures

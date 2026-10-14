@@ -1,0 +1,6 @@
+name: part1_ngram
+model:
+  type: ngram
+  n: 3
+  smoothing: kneser_ney       # alternatives: interpolated (Jelinek-Mercer), add_k
+  discount: 0.75

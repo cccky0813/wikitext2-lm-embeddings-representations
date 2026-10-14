@@ -1,0 +1,5 @@
+# Also serves as Part II setting (1): random, trainable embeddings.
+name: part1_lstm
+model:
+  type: lstm
+  embedding: random_trainable

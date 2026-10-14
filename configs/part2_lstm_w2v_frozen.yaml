@@ -1,0 +1,14 @@
+name: part2_lstm_w2v_frozen
+model:
+  type: lstm
+  embedding: word2vec_frozen
+  embedding_path: checkpoints/word2vec_100d.kv
+
+word2vec:
+  method: skipgram            # sg=1
+  vector_size: 100
+  window: 5
+  min_count: 1
+  negative: 10
+  epochs: 10
+  workers: 1                  # single thread -> deterministic given seed + PYTHONHASHSEED

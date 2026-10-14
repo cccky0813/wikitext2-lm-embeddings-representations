@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DSA4213 Assignment 1 Report</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm 16mm 16mm;
+          @bottom-center { content: counter(page); font: 8.5pt "Helvetica Neue", Arial, sans-serif; color: #555; } }
+  :root { --ink: #111; --muted: #555; --rule: #bbb; --accent: #1c5cab; }
+  html { background: #fff; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 10pt; line-height: 1.32;
+         color: var(--ink); background: #fff; margin: 0; }
+  h1 { font-size: 15pt; margin: 0 0 2px; text-align: center; }
+  .sub { text-align: center; color: var(--muted); font-size: 9.5pt; margin-bottom: 8px; }
+  h2, h3 { break-after: avoid; }
+  h2 { font-size: 11.5pt; margin: 10px 0 3px; border-bottom: 0.6pt solid var(--rule); padding-bottom: 1px; }
+  h3 { font-size: 10.2pt; margin: 6px 0 2px; }
+  p { margin: 0 0 5px; text-align: justify; hyphens: auto; }
+  ul { margin: 0 0 5px 0; padding-left: 16px; }
+  li { margin: 0 0 2px; text-align: justify; }
+  table { border-collapse: collapse; width: 100%; margin: 3px 0 4px; font-size: 8.6pt; }
+  th, td { padding: 1.6px 4px; text-align: right; border-bottom: 0.4pt solid #ddd; }
+  th { border-top: 0.8pt solid var(--ink); border-bottom: 0.6pt solid var(--ink); font-weight: bold; }
+  tr:last-child td { border-bottom: 0.8pt solid var(--ink); }
+  td:first-child, th:first-child { text-align: left; }
+  .cap { font-size: 8.8pt; color: var(--muted); margin: 0 0 6px; text-align: left; }
+  .cap b { color: var(--ink); }
+  .figrow { display: flex; gap: 8px; margin: 4px 0 0; }
+  .figrow figure { margin: 0; flex: 1; }
+  figure img { width: 100%; display: block; }
+  .q { font-weight: bold; color: var(--accent); }
+  .obs { font-variant: small-caps; font-weight: bold; }
+  code, .mono { font-family: Menlo, Consolas, monospace; font-size: 8.3pt; }
+  .gen td { text-align: left; font-size: 8.2pt; vertical-align: top; }
+  .gen td:first-child { white-space: nowrap; font-weight: bold; }
+  .best { font-weight: bold; }
+  .pb { break-before: page; }
+  .small { font-size: 8.8pt; }
+  .appendix h2 { font-size: 11pt; }
+</style>
+</head>
+<body>
+
+<h1>Language Models, Embeddings, and Representations on WikiText-2</h1>
+<div class="sub">DSA4213 Assignment 1 &middot; [Cao Kaiyue] &middot; [A0352051U] &middot;</div>
+
+<p><span class="q">Guiding question.</span> On a small corpus with a matched compute budget, how do model families and input-embedding choices differ in next-token prediction, and does better next-token prediction translate into better fixed-length representations for a downstream classifier?</p>
+
+<h2>1&nbsp;&nbsp;Setup</h2>
+<p><b>Corpus and preprocessing.</b> WikiText-2 (<span class="mono">wikitext-2-v1</span>, HuggingFace). The text is already tokenized and rare words are already mapped to <span class="mono">&lt;unk&gt;</span>. We lowercase everything (GloVe-6B is uncased, so this keeps the embedding-coverage comparison fair), split on whitespace, drop blank lines and append <span class="mono">&lt;eos&gt;</span> to every line. The vocabulary is built from the training split only: 28,913 types, including <span class="mono">&lt;pad&gt;, &lt;unk&gt;, &lt;eos&gt;</span>. The splits contain 2.08M / 216K / 244K tokens (train / valid / test), with <span class="mono">&lt;unk&gt;</span> rates of 2.6% / 5.4% / 6.2%.</p>
+<p><b>Common evaluation setup.</b> Each split is cut into windows of 65 tokens that overlap by one token, so every target in the stream is scored exactly once. The last window is right-padded, and <span class="mono">&lt;pad&gt;</span> targets are excluded from the loss. No hidden state is carried across windows. Every model, including the n-gram (whose history is clipped to the window), therefore predicts each target from at most the preceding 64 in-window tokens. We report mean next-token cross-entropy (CE, nats) and perplexity (PPL&nbsp;=&nbsp;e<sup>CE</sup>). Because no state is carried across windows, our PPLs are higher than published numbers for stateful LSTMs and should only be compared within this report.</p>
+<p><b>Hardware and timing.</b> Neural models were trained on an Apple M5 (16&nbsp;GB) with the PyTorch 2.14 MPS backend; the n-gram and Word2Vec ran on the CPU. Training time is the wall-clock time of the training loop (validation excluded), with device synchronisation before and after timing. The common inference workload is forward-only over the first 50 test batches (32&times;64 = 102,400 positions), after 5 warm-up batches. All runs use seed 42; generation uses seed 123+<i>i</i> for prompt <i>i</i>.</p>
+
+<h2>2&nbsp;&nbsp;Part I: Model families</h2>
+<p><b>Models.</b> <i>3-gram</i>: interpolated Kneser&ndash;Ney with discount D&nbsp;=&nbsp;0.75 (implemented from scratch). The highest order uses raw counts, lower orders use continuation counts, and the unigram level is interpolated with a uniform distribution. <i>Neural</i>: all three models use a randomly initialized, trainable 100-d embedding (the dimension is chosen to match GloVe-100d for Part II), followed by a backbone and an untied linear softmax layer over 28,913 words:</p>
+<ul>
+  <li><i>RNN</i>: 2-layer tanh RNN with 256 hidden units.</li>
+  <li><i>LSTM</i>: 2-layer LSTM with 256 hidden units.</li>
+  <li><i>Transformer</i>: linear projection from 100 to 256 dimensions, learned positional embeddings, then 2 pre-LN decoder blocks (4 heads, FFN 512, GELU) with a causal mask.</li>
+</ul>
+<p>Dropout is 0.3 for the RNN and LSTM and 0.2 for the Transformer. All three are trained identically: Adam (lr 10<sup>&minus;3</sup>), batch size 32&times;64, gradient-norm clipping at 1.0, at most 30 epochs, and early stopping with patience 3 on validation CE. We keep the best-validation checkpoint and evaluate it once on the test set. We checked causality empirically: perturbing token <i>t</i> leaves all logits at positions &lt;&nbsp;<i>t</i> unchanged.</p>
+
+<table>
+<tr><th>Model</th><th>Test PPL</th><th>Test CE</th><th>Val PPL</th><th>Size</th><th>Backbone params</th><th>Best / run epochs</th><th>Train time to best</th><th>s / epoch</th><th>Inference (tok/s)</th></tr>
+<tr><td>3-gram KN</td><td>227.8</td><td>5.43</td><td>242.8</td><td>2.61M n-gram entries</td><td>&ndash;</td><td>&ndash;</td><td>2.3 s (counting)</td><td>&ndash;</td><td>861K (CPU)</td></tr>
+<tr><td>RNN</td><td>176.5</td><td>5.17</td><td>190.1</td><td>10.55M</td><td>0.22M</td><td>29 / 30</td><td>3,548 s</td><td>122</td><td>89K</td></tr>
+<tr><td>LSTM</td><td>156.7</td><td>5.05</td><td>167.1</td><td>11.21M</td><td>0.89M</td><td>18 / 21</td><td>2,191 s</td><td>121</td><td>77K</td></tr>
+<tr class="best"><td>Transformer</td><td>143.0</td><td>4.96</td><td>151.6</td><td>11.42M</td><td>1.10M</td><td>23 / 26</td><td>2,633 s</td><td>115</td><td>91K</td></tr>
+</table>
+<p class="cap"><b>Table 1.</b> Prediction quality and cost on the common setup. "Backbone" counts parameters excluding the shared-shape 100-d input embedding (2.89M) and the softmax layer (7.43M). The n-gram's inference figure is per-target scoring in Python on the CPU, so it is not directly comparable to the GPU forward passes.</p>
+
+<div class="figrow">
+  <figure><img src="../results/figures/part1_loss_curves.png" alt="Part I loss curves"></figure>
+  <figure>
+    <table class="gen" style="margin-top:2px">
+      <tr><th colspan="2">Prompt: <i>"in the early years of the war"</i> / <i>"he was born in"</i></th></tr>
+      <tr><td>3-gram</td><td>. in one season . for the first time . &lt;eos&gt; the family . in the early neolithic builders , he was " . &lt;eos&gt; = = &lt;eos&gt; = = &hellip; / <i>captivity as the film , the first ever " , as the " &lt;unk&gt; in the &lt;unk&gt; @-@ &lt;unk&gt; &hellip;</i></td></tr>
+      <tr><td>RNN</td><td>. &lt;eos&gt; = = = microscopic life = = = &lt;eos&gt; on the other hand , &lt;unk&gt; can be seen in the top of the 20th century . the song was written by her parents &hellip; / <i>march 2006 . &lt;eos&gt; = = = new york = = = &lt;eos&gt; the australian football league games , federer began the second four @-@ yard @-@ winning @-@ touchdown &hellip;</i></td></tr>
+      <tr><td>LSTM</td><td>, the german prerogative was not to be the son of " the &lt;unk&gt; " . the king was also influenced by the &lt;unk&gt; ( croatian @-@ &lt;unk&gt; ) on may 23 , 1863 &hellip;</td></tr>
+      <tr><td>Transf.</td><td>. &lt;eos&gt; = = = hurricane kenna = = = &lt;eos&gt; in the atlantic ocean , hurricane christine moved to the central pacific ocean . on january 16 , an eye of convection was detected &hellip; / <i>&hellip; the hurricane produced gusty winds of 140 mph ( 140 km / h ) &hellip;</i></td></tr>
+    </table>
+    <table style="margin-top:3px">
+      <tr><th>Generated text (5 prompts &times; 40 tok)</th><th>3-gram</th><th>RNN</th><th>LSTM</th><th>Transf.</th></tr>
+      <tr><td>distinct-2</td><td>0.92</td><td>0.87</td><td>0.86</td><td>0.90</td></tr>
+      <tr><td>repeated-trigram fraction</td><td>0.02</td><td>0.04</td><td>0.06</td><td>0.04</td></tr>
+      <tr><td><span class="mono">&lt;unk&gt;</span> / heading "=" fraction</td><td>.07 / .04</td><td>.07 / .14</td><td>.09 / .14</td><td>.02 / .05</td></tr>
+    </table>
+  </figure>
+</div>
+<p class="cap"><b>Figure 1 and Table 2.</b> Left: training (dashed) and validation (solid) CE; the dot marks the best-validation epoch. Right: continuations under matched decoding (top-k&nbsp;=&nbsp;40, temperature 0.8, 40 new tokens, same seeds; only <span class="mono">&lt;pad&gt;</span> is banned), with simple repetition statistics. Full samples are in Appendix C.</p>
+
+<p><span class="obs">Observations.</span></p>
+<ul>
+<li><b>Prediction quality.</b> The ranking is Transformer (143.0) &lt; LSTM (156.7) &lt; RNN (176.5) &lt; 3-gram (227.8). Moving from the 3-gram to the RNN gives the largest single drop (&minus;51 PPL).</li>
+<li><b>Convergence.</b> The Transformer has the lowest validation loss at every epoch. It also overfits most: at its best epoch its validation CE is 0.80 nats above its training CE, versus 0.33 for the LSTM and 0.28 for the RNN, and its training loss keeps falling after validation flattens (Fig. 1). The LSTM starts worst (epoch-1 PPL 511 vs. 337 for the RNN) but overtakes the RNN at epoch 6. The RNN converges slowest (best epoch 29) and its validation curve is still noisy at the end.</li>
+<li><b>Stability.</b> The RNN alone shows gradient spikes: its pre-clip gradient norm reaches 212.7, against at most 1.7 for the other models.</li>
+<li><b>Cost.</b> Wall time per epoch is similar for all three neural models (115&ndash;122 s). Inference throughput (77&ndash;91K tok/s) varied by up to 20% between two identical runs (Transformer: 74K vs. 91K tok/s), so we do not rank the neural models by speed. The 3-gram is about 1,000&times; cheaper to "train" and about 10&times; faster to score, but it stores 2.6M entries.</li>
+<li><b>Generated text.</b>
+  <ul>
+  <li>The 3-gram produces locally plausible trigrams with no phrase-level coherence ("he was born in captivity as the film").</li>
+  <li>The RNN and LSTM produce fluent spans of 5&ndash;10 tokens but drift topic within a sentence (the RNN moves from "australian football league" to "federer" to "touchdown"). About 14% of their tokens are section-heading markup.</li>
+  <li>The Transformer stays on one topic for an entire continuation (hurricane, chart positions, genus/species) and emits the fewest <span class="mono">&lt;unk&gt;</span> tokens (1.5%). It still makes local repetitions ("a range of a range of", "corpus christi and corpus christi") and inconsistent facts ("140 mph ( 140 km / h )", "debuted at number 1 &hellip; peaked at number 21").</li>
+  </ul>
+  The repetition statistics differ only slightly between models and come from just 200 tokens per model, so we treat them as illustrative.</li>
+</ul>
+<p><span class="obs">Possible explanations</span> (not tested separately).</p>
+<ul>
+<li><b>Transformer advantage.</b> Self-attention gives every position direct access to all 64 preceding tokens, which fits the observed topical consistency. However, the Transformer also has the largest backbone (1.10M vs. 0.89M for the LSTM and 0.22M for the RNN), so architecture and parameter count are confounded.</li>
+<li><b>Transformer overfitting.</b> Its larger train&ndash;validation gap suggests higher memorisation capacity on a 2M-token corpus. Every model saw at most about 62M training tokens (30 epochs), well below the roughly 20 tokens per parameter suggested as compute-optimal for 11M-parameter models, so this is a data-limited regime.</li>
+<li><b>RNN instability.</b> The RNN's spikes match the exploding-gradient behaviour of tanh recurrences [Pascanu et al.]. Clipping was essential to train it at all, and the instability probably contributes to its slow, noisy convergence.</li>
+<li><b>Similar epoch times.</b> About 70% of each neural model's parameters are in the 28.9K-way softmax layer, which plausibly dominates compute at this scale. The Transformer's parallelism therefore does not show up as faster training at T&nbsp;=&nbsp;64 on one GPU.</li>
+</ul>
+<p><b>Trade-off.</b> On this budget, the Transformer buys about 9% lower PPL than the LSTM and clearly better topical consistency at similar wall time. It needs early stopping because it overfits fastest. The n-gram is the only choice when training compute is nearly zero, but it degrades sharply in quality.</p>
+
+<h2>3&nbsp;&nbsp;Part II: Embedding variants (LSTM)</h2>
+<p><b>Design.</b> We use the Part I LSTM and change only the input-embedding table (100-d). Architecture, data, optimiser, seed (the model is re-seeded right before construction), stopping rule and the 30-epoch cap are identical across the three settings:</p>
+<ul>
+<li><b>Random, trainable.</b> We reuse the Part I LSTM.</li>
+<li><b>Own Skip-gram, frozen.</b> gensim Skip-gram trained on the WikiText-2 training split only: window 5, 10 negative samples, 10 epochs, min_count 1, one thread. It covers 100% of the vocabulary.</li>
+<li><b>GloVe, frozen.</b> GloVe 6B 100-d (Wikipedia + Gigaword, 6B tokens). It covers 96.2% of vocabulary types and 94.7% of training tokens. The 1,103 out-of-vocabulary (OOV) types are dominated by very frequent WikiText markup: <span class="mono">&lt;unk&gt;</span> (54.6K occurrences), <span class="mono">&lt;eos&gt;</span> (23.8K), <span class="mono">@-@</span> (16.9K), <span class="mono">@.@</span>, <span class="mono">@,@</span> and <span class="mono">'t</span>.</li>
+</ul>
+<p>OOV rows are drawn from N(0,&nbsp;&sigma;), where &sigma; is the standard deviation of the pretrained vectors (0.41 for GloVe), and the <span class="mono">&lt;pad&gt;</span> row is zero. In both frozen settings the <i>entire</i> table is fixed, including the random OOV rows, which leaves 8.32M trainable parameters instead of 11.21M.</p>
+
+<table>
+<tr><th>Input embedding</th><th>Test PPL</th><th>Val PPL</th><th>Val PPL ep1 / ep5</th><th>Best / run ep.</th><th>Val&minus;train CE at best</th><th>Grad norm mean / max</th><th>Trainable</th><th>LM time to best</th><th>Embedding cost</th><th>distinct-2</th></tr>
+<tr><td>Random, trainable</td><td>156.7</td><td>167.1</td><td>511 / 228</td><td>18 / 21</td><td>0.33</td><td>0.25 / 1.26</td><td>11.21M</td><td>2,191 s</td><td>&ndash;</td><td>0.86</td></tr>
+<tr class="best"><td>Own Skip-gram, frozen</td><td>141.1</td><td>149.7</td><td>580 / 200</td><td>18 / 21</td><td>0.25</td><td>0.25 / 1.30</td><td>8.32M</td><td>1,876 s</td><td>55 s (1 CPU thread)</td><td>0.89</td></tr>
+<tr><td>GloVe 6B, frozen</td><td>153.1</td><td>162.5</td><td>653 / 223</td><td>18 / 21</td><td>0.20</td><td>0.25 / 1.62</td><td>8.32M</td><td>1,897 s</td><td>external (6B tokens)</td><td>0.75</td></tr>
+</table>
+<div class="figrow">
+  <figure><img src="../results/figures/part2_loss_curves.png" alt="Part II loss curves"></figure>
+  <figure><img src="../results/figures/part2_grad_norm.png" alt="Part II gradient norms"></figure>
+</div>
+<p class="cap"><b>Table 3 and Figure 2.</b> Embedding ablation on the LSTM. The cost of training our own embeddings is reported separately from LM training. Gradient norms are measured before clipping and averaged per epoch.</p>
+
+<p><span class="obs">Observations.</span></p>
+<ul>
+<li><b>Prediction quality.</b> Both frozen settings beat the trainable baseline: Skip-gram reduces test PPL by 15.6 (&minus;10%) and GloVe by 3.6. The Skip-gram LSTM (141.1) even edges past the Part I Transformer (143.0).</li>
+<li><b>Convergence.</b> The frozen settings start worse (epoch-1 PPL 580 and 653 vs. 511), but Skip-gram overtakes the baseline at epoch 2. All three settings reach their best epoch at 18, and freezing narrows the generalisation gap (0.33 &rarr; 0.25 / 0.20 nats).</li>
+<li><b>Stability.</b> Gradient behaviour is nearly identical across settings (mean norm 0.25, maximum 1.26&ndash;1.62). Embedding choice does not affect stability here, unlike the architecture choice in Part I.</li>
+<li><b>Cost.</b> Training our own embeddings costs 55 s, about 3% of the LM's time to best.</li>
+<li><b>Generated text.</b> The GloVe model's samples are the most repetitive (distinct-2 0.75), but 24% of its sampled tokens are heading markup ("= = = synopsis = = =" repeated). With only 5 samples, we do not draw conclusions from this.</li>
+</ul>
+<p><span class="obs">Interpretation: trainability vs. extra data.</span></p>
+<ul>
+<li><b>Why freezing helps.</b> Freezing removes 2.89M parameters (26%) that would otherwise be fitted to only 2M tokens. The smaller generalisation gaps are consistent with reduced overfitting, and the Skip-gram result shows that a good fixed initialisation is worth more here than trainability. A plausible mechanism is that Skip-gram gives every word, including rare ones (min_count&nbsp;=&nbsp;1, 10 passes), a vector shaped by its contexts. In the trainable table, rare words receive only a few noisy updates from the LM loss.</li>
+<li><b>Why GloVe helps less despite its data.</b> GloVe was trained on about 3,000&times; more text, yet it helps less than Skip-gram on WikiText-2 PPL. Two plausible reasons:
+  <ol>
+  <li>The OOV rows are precisely the most frequent structural tokens, so 5.3% of input tokens enter the LSTM as fixed random vectors that can never be refined.</li>
+  <li>Skip-gram was trained on exactly the LM's token stream and its tokenization conventions, whereas GloVe reflects a different corpus mixture.</li>
+  </ol>
+  The extra data in GloVe therefore does not translate into in-domain prediction, but it does matter for out-of-domain features (Part III).</li>
+<li><b>What this design cannot separate.</b> It cannot fully disentangle "fixed vs. trainable" from "initialisation quality". A pretrained-but-trainable variant would separate the two; we did not run it (Section 5).</li>
+</ul>
+
+<h2>4&nbsp;&nbsp;Part III: Downstream representation analysis</h2>
+<p><b>Task and protocol.</b> AG News topic classification (4 balanced classes) with stratified subsets: 10K train and a disjoint 2K validation set from the official training split, and 2K test from the official test split.</p>
+<ul>
+<li><b>Tokenization.</b> Texts are tokenized to mimic WikiText conventions (punctuation and clitics split, <span class="mono">@-@</span> / <span class="mono">@,@</span> markers, HTML entities removed), mapped into the LM vocabulary and truncated to 64 tokens. Texts average 44.6 tokens; 6.2% are truncated and 8.4% of tokens are <span class="mono">&lt;unk&gt;</span> (vs. 6.2% on WikiText-2 test).</li>
+<li><b>Representations.</b> Every LM stays frozen. A text becomes one fixed-length vector in one of three ways:
+  <ul>
+  <li><b>last</b>: the top-layer hidden state at the last non-pad position.</li>
+  <li><b>mean</b>: the average of top-layer states over non-pad positions, masked so padding is excluded.</li>
+  <li><b>emb-mean</b>: the average of the LSTM's <i>input</i> embeddings, used as a context-free reference.</li>
+  </ul>
+  Right padding never influences these states, because every model is causal.</li>
+<li><b>Classifier.</b> All representations share the same classifier family and procedure: standardisation followed by multinomial logistic regression, with C &isin; {0.01, 0.1, 1, 10} selected on validation macro-F1. The test set is scored once. We report 95% bootstrap confidence intervals (1,000 resamples of the test set) and paired bootstrap tests for the key differences.</li>
+</ul>
+<table>
+<tr><th>Representation (frozen LM, pooling)</th><th>Dim</th><th>Test acc.</th><th>Test macro-F1 [95% CI]</th><th>F1 Business / Sports</th><th>LM test PPL</th></tr>
+<tr><td>LSTM, last</td><td>256</td><td>0.649</td><td>0.644 [0.623, 0.663]</td><td>0.48 / 0.79</td><td>156.7</td></tr>
+<tr><td>LSTM, mean</td><td>256</td><td>0.705</td><td>0.703 [0.686, 0.723]</td><td>0.60 / 0.83</td><td>156.7</td></tr>
+<tr><td>Transformer, last</td><td>256</td><td>0.720</td><td>0.718 [0.700, 0.735]</td><td>0.60 / 0.85</td><td>143.0</td></tr>
+<tr><td>Transformer, mean</td><td>256</td><td>0.774</td><td>0.773 [0.755, 0.790]</td><td>0.69 / 0.88</td><td>143.0</td></tr>
+<tr><td>RNN, mean</td><td>256</td><td>0.730</td><td>0.727 [0.708, 0.746]</td><td>0.61 / 0.85</td><td>176.5</td></tr>
+<tr><td>LSTM + own Skip-gram (frozen), mean</td><td>256</td><td>0.791</td><td>0.790 [0.772, 0.806]</td><td>0.69 / 0.90</td><td>141.1</td></tr>
+<tr class="best"><td>LSTM + GloVe (frozen), mean</td><td>256</td><td>0.831</td><td>0.830 [0.812, 0.847]</td><td>0.75 / 0.93</td><td>153.1</td></tr>
+<tr><td>LSTM input embeddings, emb-mean (no context)</td><td>100</td><td>0.674</td><td>0.672 [0.651, 0.692]</td><td>0.57 / 0.76</td><td>&ndash;</td></tr>
+</table>
+<div class="figrow">
+  <figure><img src="../results/figures/part3_scores.png" alt="Part III scores"></figure>
+  <figure><img src="../results/figures/ppl_vs_downstream.png" alt="Perplexity vs downstream F1"></figure>
+</div>
+<p class="cap"><b>Table 4 and Figure 3.</b> Frozen-LM features with a logistic-regression probe on AG News. Right: LM test PPL against downstream macro-F1, one point per LM (mean pooling).</p>
+
+<p><span class="obs">Observations.</span></p>
+<ul>
+<li><b>Primary comparison: architecture and pooling.</b>
+  <ul>
+  <li>The Transformer beats the LSTM under both poolings: +7.0 macro-F1 points with mean pooling (paired 95% CI [+4.8, +8.9]) and +7.4 with last pooling ([+5.0, +9.6]).</li>
+  <li>Mean pooling beats last-state pooling for both models: +5.9 for the LSTM ([+3.9, +8.0]) and +5.5 for the Transformer ([+3.7, +7.3]).</li>
+  <li>Context helps: LSTM mean states outperform the average of the same model's input embeddings by +3.1 ([+1.0, +5.3]).</li>
+  </ul></li>
+<li><b>LM ranking vs. downstream ranking.</b> The two rankings agree only partially. For the five LMs with mean pooling, Spearman &rho;&nbsp;=&nbsp;0.6 between the PPL rank and the F1 rank (n&nbsp;=&nbsp;5, p&nbsp;=&nbsp;0.28).
+  <ul>
+  <li>The Transformer is better than the LSTM on both measures.</li>
+  <li>The RNN has the <i>worst</i> PPL but beats the LSTM downstream (+2.4, [+0.5, +4.2]).</li>
+  <li>The largest violation: GloVe ranks only 3rd in PPL but 1st downstream, ahead of Skip-gram (+4.0, [+2.4, +5.6]), which has the best PPL.</li>
+  <li>Skip-gram vs. Transformer (+1.7) is not distinguishable ([&minus;0.2, +3.5]).</li>
+  </ul></li>
+<li><b>Errors.</b> Business is the hardest class for every representation (F1 0.48&ndash;0.75). Its most frequent confusion is with Sci/Tech: 84&ndash;117 of the 500 Business test items are predicted as Sci/Tech.
+  <ul>
+  <li>121 test items (6%) are misclassified by all seven contextual representations. Many of these sit on genuine topic boundaries. "IBM posts broad Q3 revenue growth" is gold Sci/Tech but predicted Business. "DaimlerChrysler, GM to team up on hybrid engines" is gold Business but predicted Sci/Tech.</li>
+  <li>Some look like label noise: "Stocks Close Higher on Brokerage Earnings" and "Tokyo Stocks Finish 2.6 Percent Higher" are gold World.</li>
+  <li>Decisive entity names are often <span class="mono">&lt;unk&gt;</span> in the WikiText vocabulary (e.g. "Yuganskneftegaz", "Hynix"), which removes the strongest cue.</li>
+  <li>Across representations, GloVe-mean is right where LSTM-last is wrong on 461 items, against 96 in the reverse direction. Typical rescues are sports headlines with misleading surface words, such as "Red Sox Stumble and Fumble Their Way to Series Lead" (LSTM-last: Sci/Tech).</li>
+  </ul></li>
+</ul>
+<p><span class="obs">Interpretation.</span></p>
+<ul>
+<li><b>Why mean pooling wins.</b> The last state is trained to predict the <i>next</i> token, so it mostly encodes local syntax near the end of the snippet, often just after a full stop. Averaging aggregates the topical words spread across the text.</li>
+<li><b>Why the rankings disagree.</b> Lower WikiText-2 PPL is neither necessary nor sufficient for better topic features. Downstream accuracy depends heavily on lexical knowledge of news vocabulary and entities. GloVe acquired this from 6B tokens that include newswire (Gigaword), the same genre as AG News, while PPL measures only in-domain Wikipedia prediction. In-domain Skip-gram helps both measures. The RNN result shows that ranking reversals happen even without external data, which fits a broader point: next-token loss rewards local predictive detail, which is not the same as text-level topic information. We cannot isolate a mechanism for the RNN case from these runs.</li>
+</ul>
+
+<h2>5&nbsp;&nbsp;Limitations, failure cases, and lessons</h2>
+<ul>
+<li><b>Single seed and limited timing.</b> Each configuration was trained once (seed 42), and the MPS kernels are not bit-exact, so small PPL differences (e.g. Skip-gram LSTM vs. Transformer, 141.1 vs. 143.0) are not established. Throughput was timed once per model and varied by up to 20% between identical runs.</li>
+<li><b>No per-architecture tuning.</b> All models share one optimiser setting with a constant learning rate and no schedule. Results describe this matched budget and do not show each architecture's best achievable performance.</li>
+<li><b>Choices that limit comparability.</b> Lowercasing, a word-level vocabulary with <span class="mono">&lt;unk&gt;</span>, and 64-token stateless windows make our PPLs incomparable to the literature. Word-level <span class="mono">&lt;unk&gt;</span> also hurts transfer to AG News (8.4% <span class="mono">&lt;unk&gt;</span>).</li>
+<li><b>Part II gaps.</b> We did not run trainable pretrained embeddings, so "frozen" and "good initialisation" are confounded. GloVe's OOV tokens are concentrated on frequent markup, which disadvantages it for this corpus specifically.</li>
+<li><b>Part III gaps.</b> A linear probe on frozen features measures linearly accessible information only, and evaluation uses a 2K-item test subset (95% CIs of about &plusmn;1.8 points). Some "errors" are label ambiguity.</li>
+<li><b>Lessons.</b>
+  <ol>
+  <li>With 2M tokens, regularisation by freezing a good in-domain embedding beat adding trainable capacity.</li>
+  <li>Gradient clipping was not optional for the vanilla RNN.</li>
+  <li>Representation quality for a downstream task depends on pooling (&plusmn;6 points) and on the lexical coverage of pretraining data at least as much as on next-token PPL.</li>
+  </ol></li>
+</ul>
+
+<h2>References</h2>
+<div class="small">
+<p>[1] Merity, Xiong, Bradbury, Socher (2016). Pointer Sentinel Mixture Models. (WikiText-2) &middot; [2] Kneser &amp; Ney (1995). Improved backing-off for M-gram language modeling. ICASSP &middot; [3] Chen &amp; Goodman (1999). An empirical study of smoothing techniques for language modeling. CSL &middot; [4] Hochreiter &amp; Schmidhuber (1997). Long short-term memory. Neural Computation &middot; [5] Vaswani et al. (2017). Attention is all you need. NeurIPS &middot; [6] Xiong et al. (2020). On layer normalization in the Transformer architecture. ICML &middot; [7] Pascanu, Mikolov, Bengio (2013). On the difficulty of training recurrent neural networks. ICML &middot; [8] Mikolov et al. (2013). Distributed representations of words and phrases and their compositionality. NeurIPS &middot; [9] Pennington, Socher, Manning (2014). GloVe: Global vectors for word representation. EMNLP &middot; [10] Zhang, Zhao, LeCun (2015). Character-level convolutional networks for text classification. NeurIPS (AG News) &middot; [11] Hoffmann et al. (2022). Training compute-optimal large language models &middot; [12] Fan, Lewis, Dauphin (2018). Hierarchical neural story generation. ACL (top-k sampling) &middot; Software: PyTorch, gensim (&#344;eh&#367;&#345;ek &amp; Sojka 2010), scikit-learn, HuggingFace <span class="mono">datasets</span>, matplotlib.</p>
+</div>
+
+<div class="appendix pb">
+<h2>Appendix A &nbsp;Configuration and reproducibility</h2>
+<table>
+<tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Data</td><td>WikiText-2 v1 (lowercased); vocab 28,913 from train; windows 64+1, stride 64, no state carry-over</td></tr>
+<tr><td>Shared LM settings</td><td>emb 100, untied output, Adam lr 1e-3, wd 0, batch 32, clip 1.0, &le;30 epochs, early stop patience 3 (val CE), seed 42</td></tr>
+<tr><td>RNN / LSTM</td><td>2 layers, hidden 256, dropout 0.3 (embedding, between layers, output)</td></tr>
+<tr><td>Transformer</td><td>100&rarr;256 projection, learned positions (64), 2 pre-LN blocks, 4 heads, FFN 512, GELU, dropout 0.2, final LayerNorm</td></tr>
+<tr><td>3-gram</td><td>Interpolated Kneser&ndash;Ney, D = 0.75; uniform interpolation at unigram level</td></tr>
+<tr><td>Skip-gram</td><td>gensim 4.4, sg=1, dim 100, window 5, negative 10, 10 epochs, min_count 1, 1 worker, PYTHONHASHSEED=0</td></tr>
+<tr><td>Generation</td><td>5 prompts (<span class="mono">configs/prompts.txt</span>), top-k 40, T 0.8, 40 tokens, seed 123+i, context clipped to 64</td></tr>
+<tr><td>Part III</td><td>AG News 10K/2K/2K stratified (seed 42), max 64 tokens, StandardScaler + LogisticRegression (lbfgs, max_iter 5000), C by val macro-F1</td></tr>
+</table>
+<p class="small">Everything is reproduced with <span class="mono">bash scripts/run_all.sh</span> (about 4.5 h on the hardware above). All hyperparameters are in <span class="mono">configs/</span>, and every metrics JSON stores its resolved config and hardware info. See <span class="mono">README.md</span> for data access and commands.</p>
+
+<h2>Appendix B &nbsp;Effect of the training budget (15 vs. 30 epochs)</h2>
+<p class="small">An earlier run capped at 15 epochs stopped every neural model at epoch 15, so none had converged. We therefore raised the cap to 30 epochs. The ranking is unchanged, and the gains are 1&ndash;3%:</p>
+<table>
+<tr><th>Test PPL</th><th>RNN</th><th>LSTM</th><th>Transformer</th><th>LSTM + Skip-gram</th><th>LSTM + GloVe</th></tr>
+<tr><td>15-epoch cap</td><td>180.0</td><td>158.0</td><td>145.7</td><td>142.1</td><td>155.3</td></tr>
+<tr><td>30-epoch cap (reported)</td><td>176.5</td><td>156.7</td><td>143.0</td><td>141.1</td><td>153.1</td></tr>
+</table>
+<p class="small">The Part III ordering was also stable. With the 15-epoch models the macro-F1 values were GloVe 0.834, Skip-gram 0.789, Transformer-mean 0.760, RNN-mean 0.693, LSTM-mean 0.689 and LSTM-last 0.608. The same Transformer throughput measured 73.9K tok/s in that run, compared with 91.3K here.</p>
+
+<h2>Appendix C &nbsp;Generated samples (matched decoding)</h2>
+<table class="gen">
+<tr><th>Model</th><th>Prompt &rarr; continuation (first 25 tokens)</th></tr>
+<tr><td>3-gram</td><td>[the history of the city] of sarnia , which was then re @-@ released as an official single " no one wanted to do so , the &lt;unk&gt; and &hellip;</td></tr>
+<tr><td>RNN</td><td>[the album was released] by paul mccartney . she was nominated for the uk of the music and &lt;unk&gt; . &lt;eos&gt; = = = = &lt;unk&gt; &lt;unk&gt; = = = &hellip;</td></tr>
+<tr><td>LSTM</td><td>[the species is found in] the genus . &lt;eos&gt; = = = chemical bodies = = = &lt;eos&gt; although a protein of cadmium is a dag , the cell is &hellip;</td></tr>
+<tr><td>Transformer</td><td>[the album was released] on august 17 , 2006 . " crazy in love " debuted at number 1 on the billboard hot 100 , 2009 . it peaked at number 21 &hellip;</td></tr>
+<tr><td>Transformer</td><td>[the species is found in] the united states . the formation of species is a member of the migratory species of species that is particularly in the genus stereum &hellip;</td></tr>
+<tr><td>LSTM + Skip-gram</td><td>[the album was released] on cd @-@ rom on july 7 , 2013 , and the video has been released on june 14 , 2003 , which the song was released &hellip;</td></tr>
+<tr><td>LSTM + GloVe</td><td>[the album was released] by michael kahne . &lt;eos&gt; = = = synopsis = = = &lt;eos&gt; = = = production = = = &lt;eos&gt; = = = critical reception = = = &hellip;</td></tr>
+</table>
+<p class="small">All samples are in <span class="mono">results/samples/*.txt</span>, and the full Part III error lists are in <span class="mono">results/samples/part3_errors.md</span>.</p>
+
+<h2>Appendix D &nbsp;Responsible tool and data use</h2>
+<p class="small">All datasets are public and are downloaded by the code: WikiText-2 (CC BY-SA), AG News (non-commercial research use) and GloVe (PDDL). None are redistributed in the repository. No API keys or private data are used. <b>AI assistance:</b> the code base (data pipeline, models, training and evaluation scripts) and a first draft of this report were produced with the help of Claude (Anthropic), an AI coding assistant, under my direction. I chose the experimental design, reviewed and ran all experiments, verified the reported numbers against the generated result files, and revised the analysis to reflect my own understanding. [Edit this statement so that it accurately describes your own contribution.]</p>
+</div>
+
+</body>
+</html>

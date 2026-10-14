@@ -1,0 +1,12 @@
+# part2_lstm_glove_frozen | top_k=40 T=0.8 max_new_tokens=40 seed=123
+
+[the history of the city] , is the most important of the population of the largest state of california , and the <unk> and palestine and the city of the missouri <unk> <unk> , the <unk> national of the united states . <eos> varanasi deane
+
+[in the early years of the war] . <eos> = = = early and 1920s = = = <eos> = = = = = campaign = = = = <eos> the jin 's independence , the government was the royal 's party in the <unk> national anthem
+
+[the album was released] by michael kahne . <eos> = = = synopsis = = = <eos> = = = production = = = <eos> = = = critical reception = = = <eos> the first of the episode " bossy " was a
+
+[he was born in] <unk> . <eos> = = = = <unk> = = = = <eos> the " a <unk> " , and she had previously one of the most popular author . <eos> = = = writing = = = <eos> =
+
+[the species is found in] the genus felinae . the first ceratopsian <unk> is the closest @-@ <unk> sgitheanach . the species , are to be a common genus . the earliest @-@ known name , are also known as <unk> <unk> ( <unk> <unk>
+
